@@ -1,9 +1,14 @@
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Scanner;
+import java.util.Properties;
 
 public class Client {
+    String propsKey = getPSK("enigma.propertis");// Inseriamo qui il nome del file da cui leggere la prop "key" con il
+                                                 // metodo getPSK
+
     public static void main(String[] args) {
         if (args.length != 3) {
             System.err.println("Usage: java Client <server-ip> <port> <username>");
@@ -69,9 +74,22 @@ public class Client {
                 out.println(username + ": " + message);
             }
 
-
         } catch (IOException e) {
             System.out.println("Si è verificato un errore di rete: " + e.getMessage());
+        }
+    }
+
+    private static String getPSK(String filename) { // Metodo privato per ottenere la chiave condivisa dal file di
+                                                    // configurazione
+        Properties prop = new Properties(); // Crea un nuovo oggetto Properties per gestire le proprietà
+        try (FileInputStream fis = new FileInputStream(filename)) { // Apre un file di input stream per leggere le
+                                                                    // proprietà
+            prop.load(fis); // Carica le proprietà dal file
+            return prop.getProperty("key"); // Restituisce il valore della chiave condivisa dal file di
+                                            // configurazione
+        } catch (IOException e) { // Gestisce eventuali eccezioni di IO
+            e.printStackTrace(); // Stampa lo stack trace dell'eccezione
+            return null; // Restituisce null in caso di errore
         }
     }
 }
