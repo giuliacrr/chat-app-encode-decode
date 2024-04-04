@@ -32,6 +32,9 @@ public class Client {
             EnigmaSimulator enigmaSimulator = new EnigmaSimulator();
             boolean enigmaOn = false; // booleana enigmaOn, false indica non attivo.
             boolean aesOn = false;
+            boolean ceasarOn = false;
+
+            int shift=0;; //numeri di salti per ceasar
 
             // Thread per ascoltare e stampare i messaggi in arrivo dal server.
             Thread serverListener = new Thread(() -> {
@@ -58,6 +61,7 @@ public class Client {
                     System.out.println("ENIGMA encrypting ON");// Verrà stampato un messaggio di avviso
                     enigmaOn = true;// E la variabile diventerà true, attivando l'encrypting a riga 60
                     aesOn = false;
+                    ceasarOn = false;
                     continue;
                 }
                 // Attiva eas encrypting
@@ -65,8 +69,23 @@ public class Client {
                     System.out.println("AES encrypting ON");
                     aesOn = true;
                     enigmaOn = false;
+                    ceasarOn = false;
                     continue;
                 }
+
+                
+                // Attiva caesar
+                if (message.equalsIgnoreCase("caesar_on")) { // Quando l'utente scrive il comando ceasar_on in chat
+                    System.out.println("CAESAR encrypting ON");// Verrà stampato un messaggio di avviso
+                    ceasarOn = true; // E la variabile diventerà true, attivando l'encrypting a riga 77
+                    enigmaOn = false;
+                    aesOn = false;
+                    System.out.println("Di quanto vuoi shiftare?");
+                    Scanner scCesare = new Scanner(System.in);
+                    shift = scCesare.nextInt();
+                    continue;
+                }
+
                 // disattiva enigma
                 if (message.equalsIgnoreCase("enigma_off")) {// Quando l'utente scrive il comando enigma_on in chat
                     System.out.println("ENIGMA encrypting OFF");// Verrà stampato un messaggio di avviso
@@ -79,6 +98,16 @@ public class Client {
                     aesOn = false;// E la variabile diventerà false, disattivando l'encrypting a riga 60
                     continue;
                 }
+
+                // disattiva caesar
+                if (message.equalsIgnoreCase("caesar_off")) {// Quando l'utente scrive il comando enigma_on in chat
+                    System.out.println("CAESAR encrypting OFF");// Verrà stampato un messaggio di avviso
+                    ceasarOn = false;// E la variabile diventerà false, disattivando l'encrypting a riga 60
+                    continue;
+                }
+
+                
+
 
                 // Cripta il messaggio se l'utente ha scritto il comando enigma_on
                 if (enigmaOn == true) {
@@ -95,6 +124,17 @@ public class Client {
                 if (aesOn == true) { // Se è attivo AES
                     try { // Prova a criptare il messaggio utilizzando AES
                         message = CryptoUtils.encrypt(message, propsKey); // Cripta il messaggio utilizzando AES
+                    } catch (Exception e) { // Gestisce eventuali eccezioni
+                        System.err.println("Errore nella crittografia del messaggio: " +
+                                e.getMessage()); // Stampa un di errore
+                        continue; // Salta all'iterazione successiva del loop
+                    }
+                }
+
+                if (ceasarOn == true) { // Se è attivo CAESAR
+                    try { // Prova a criptare il messaggio utilizzando CAESAR
+                        //CifrarioDiCesare cifrarioDiCesare = new CifrarioDiCesare();
+                        message = CifrarioDiCesare.trasforma(message, shift); // Cripta il messaggio utilizzando CAESAR
                     } catch (Exception e) { // Gestisce eventuali eccezioni
                         System.err.println("Errore nella crittografia del messaggio: " +
                                 e.getMessage()); // Stampa un di errore
