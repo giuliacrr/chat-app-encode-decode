@@ -69,7 +69,6 @@ public class Client {
                 out.println(username + ": " + message);
             }
 
-
         } catch (IOException e) {
             System.out.println("Si è verificato un errore di rete: " + e.getMessage());
         }
