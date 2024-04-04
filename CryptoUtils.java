@@ -4,8 +4,13 @@ import javax.crypto.spec.SecretKeySpec;
 import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Properties;
 
 public class CryptoUtils {
+
+  private Properties props;
+  String propsKey = props.getProperty("key");
+
   // Metodo statico per criptare una stringa con una chiave fornita.
   public static String encrypt(String data, String key) throws Exception {
     // Generazione della specifica della chiave crittografica dalla chiave fornita.
