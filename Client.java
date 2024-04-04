@@ -6,8 +6,9 @@ import java.util.Scanner;
 import java.util.Properties;
 
 public class Client {
-    String propsKey = getPSK("enigma.propertis");// Inseriamo qui il nome del file da cui leggere la prop "key" con il
-                                                 // metodo getPSK
+    static String propsKey = getPSK("enigma.properties");// Inseriamo qui il nome del file da cui leggere la prop "key"
+                                                         // con il
+    // metodo getPSK
 
     public static void main(String[] args) {
         if (args.length != 3) {
@@ -30,6 +31,7 @@ public class Client {
             // Istanza di EnigmaSimulator, se richiesto dall'utente.
             EnigmaSimulator enigmaSimulator = new EnigmaSimulator();
             boolean enigmaOn = false; // booleana enigmaOn, false indica non attivo.
+            boolean aesOn = false;
 
             // Thread per ascoltare e stampare i messaggi in arrivo dal server.
             Thread serverListener = new Thread(() -> {
@@ -51,29 +53,56 @@ public class Client {
                     out.println(username + " ha lasciato la chat.");
                     break;
                 }
-
+                // Attiva enigma
                 if (message.equalsIgnoreCase("enigma_on")) { // Quando l'utente scrive il comando enigma_on in chat
-                    System.out.println("Message encrypting ON");// Verrà stampato un messaggio di avviso
+                    System.out.println("ENIGMA encrypting ON");// Verrà stampato un messaggio di avviso
                     enigmaOn = true;// E la variabile diventerà true, attivando l'encrypting a riga 60
+                    aesOn = false;
                     continue;
-
                 }
-
+                // Attiva eas encrypting
+                if (message.equalsIgnoreCase("aes_on")) {
+                    System.out.println("AES encrypting ON");
+                    aesOn = true;
+                    enigmaOn = false;
+                    continue;
+                }
+                // disattiva enigma
                 if (message.equalsIgnoreCase("enigma_off")) {// Quando l'utente scrive il comando enigma_on in chat
-                    System.out.println("Message encrypting OFF");// Verrà stampato un messaggio di avviso
+                    System.out.println("ENIGMA encrypting OFF");// Verrà stampato un messaggio di avviso
                     enigmaOn = false;// E la variabile diventerà false, disattivando l'encrypting a riga 60
+                    continue;
+                }
+                // disattiva aes
+                if (message.equalsIgnoreCase("aes_off")) {// Quando l'utente scrive il comando enigma_on in chat
+                    System.out.println("AES encrypting OFF");// Verrà stampato un messaggio di avviso
+                    aesOn = false;// E la variabile diventerà false, disattivando l'encrypting a riga 60
                     continue;
                 }
 
                 // Cripta il messaggio se l'utente ha scritto il comando enigma_on
                 if (enigmaOn == true) {
-                    message = enigmaSimulator.cifraDecifra(message, true);
+                    try { // Prova a criptare il messaggio utilizzando ENIGMA
+                        message = enigmaSimulator.cifraDecifra(message, true); // Cripta il messaggio utilizzando ENIGMA
+                    } catch (Exception e) { // Gestisce eventuali eccezioni
+                        System.err.println("Errore nella crittografia del messaggio: " + e.getMessage()); // Stampa un
+                                                                                                          // messaggio
+                                                                                                          // di errore
+                        continue; // Salta all'iterazione successiva del loop
+                    }
                 }
-
-                // Invia il messaggio al server.
+                // Cripta se l'utente ha il comando eas_on
+                if (aesOn == true) { // Se è attivo AES
+                    try { // Prova a criptare il messaggio utilizzando AES
+                        message = CryptoUtils.encrypt(message, propsKey); // Cripta il messaggio utilizzando AES
+                    } catch (Exception e) { // Gestisce eventuali eccezioni
+                        System.err.println("Errore nella crittografia del messaggio: " +
+                                e.getMessage()); // Stampa un di errore
+                        continue; // Salta all'iterazione successiva del loop
+                    }
+                }
                 out.println(username + ": " + message);
             }
-
         } catch (IOException e) {
             System.out.println("Si è verificato un errore di rete: " + e.getMessage());
         }
