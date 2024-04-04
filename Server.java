@@ -1,4 +1,3 @@
-
 // Importa le classi necessarie per gestire input/output e networking.
 import java.io.FileWriter;
 import java.io.IOException;
@@ -16,7 +15,9 @@ public class Server {
     private static FileWriter fileWriter; // Aggiunto per la scrittura su file
     private static int usersPresent;
 
+
     private static String onlineUsers;
+
 
     public static void main(String[] args) {
         try {
@@ -43,27 +44,24 @@ public class Server {
             this.clientSocket = socket;
         }
 
-        private static void updateOnlineUsersMessage() {
-            onlineUsers = "Utenti online: " + usersPresent;
-        }
-
         @Override
         public void run() {
-            String messageLog = null; // Inizializzato fuori dal try per essere accessibile ovunque
             try {
                 Scanner in = new Scanner(clientSocket.getInputStream());
                 out = new PrintWriter(clientSocket.getOutputStream(), true);
                 // Attende la ricezione dell'username dal client come primo messaggio
-                messageLog = in.nextLine();// contiene l'username(meglio cambiare nome)
+                CifrarioDiCesare.decripta(onlineUsers, PORT);
+                String messageLog = in.nextLine();
                 String welcomeMessage = "L'utente " + messageLog + " si è appena connesso dall'IP "
                         + clientSocket.getRemoteSocketAddress();
                 // Prima di aggiungere il writer all'insieme, annuncia la connessione del nuovo
                 // utente
+                broadcast(welcomeMessage);
                 clientWriters.add(out);
                 usersPresent++;
-                updateOnlineUsersMessage(); // Aggiorna il messaggio con il numero di utenti online
-                broadcast(welcomeMessage);
-                broadcast(onlineUsers); // Notifica il numero aggiornato di utenti online
+                
+
+                broadcast(onlineUsers);
 
                 while (true) {
                     if (in.hasNextLine()) {
@@ -82,15 +80,7 @@ public class Server {
             } finally {
                 if (out != null) {
                     clientWriters.remove(out);
-                    usersPresent--;
-                    updateOnlineUsersMessage(); // Aggiorna il messaggio con il numero di utenti online
-                    String goodbyeMessage = "L'utente " + messageLog + " ha lasciato la chat.";
-                    broadcast(goodbyeMessage);
-                    // Invia il messaggio aggiornato con il numero di utenti attivi
-                    String activeUsersMessage = "Ci sono " + usersPresent + " utenti attivi.";
-                    broadcast(activeUsersMessage);
-                    // broadcast(onlineUsers); // Notifica il numero aggiornato di utenti online
-
+                    usersPresent--;     
                 }
                 try {
                     clientSocket.close();
@@ -111,6 +101,6 @@ public class Server {
                 System.out.println("Tentativo di inviare un messaggio vuoto o null.");
             }
         }
-
+        
     }
 }

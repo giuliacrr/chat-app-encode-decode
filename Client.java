@@ -1,15 +1,11 @@
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Scanner;
-import java.util.Properties;
 
 public class Client {
-    static String propsKey = getPSK("enigma.properties");// Inseriamo qui il nome del file da cui leggere la prop "key"
-                                                         // con il
-    // metodo getPSK
-
+    private static int sceltaShift;
+    private static boolean cifrarioDiCesare;
     public static void main(String[] args) {
         if (args.length != 3) {
             System.err.println("Usage: java Client <server-ip> <port> <username>");
@@ -28,97 +24,55 @@ public class Client {
             out.println(username);
             System.out.println("Connected to server. Start typing messages (type 'exit' to quit).");
 
-            // Istanza di EnigmaSimulator, se richiesto dall'utente.
-            EnigmaSimulator enigmaSimulator = new EnigmaSimulator();
-            boolean enigmaOn = false; // booleana enigmaOn, false indica non attivo.
-            boolean aesOn = false;
+            // Chiede all'utente se desidera criptare i messaggi.
+            System.out.println("Vuoi criptare i messaggi con il cifrario di Cesare? Si / No");
+            String scelta = userInput.nextLine();
+            //se l'utente digita "si" il booleano diventa true
+            cifrarioDiCesare = scelta.equalsIgnoreCase("si");
+
+
+            System.out.println("di quante posizioni vuoi shiftare le lettere?");
+                 sceltaShift = userInput.nextInt();
+        
 
             // Thread per ascoltare e stampare i messaggi in arrivo dal server.
             Thread serverListener = new Thread(() -> {
                 try (Scanner in = new Scanner(socket.getInputStream())) {
                     while (in.hasNextLine()) {
-                        System.out.println(in.nextLine());
+                        if(cifrarioDiCesare){
+                            String messaggioCriptato = in.nextLine();
+                            String messaggioDecriptato = CifrarioDiCesare.cripta(messaggioCriptato, sceltaShift);
+                            System.out.println(messaggioDecriptato);
+                        }else{
+                            System.out.println(in.nextLine());
+                        }
                     }
                 } catch (IOException e) {
                     System.out.println("Errore durante la lettura dal server: " + e.getMessage());
                 }
             });
             serverListener.start();
+
             // Ciclo principale per l'invio di messaggi.
             while (true) {
                 String message = userInput.nextLine();
 
                 // Esce dal ciclo se l'utente digita "exit".
                 if (message.equalsIgnoreCase("exit")) {
-                    out.println(username + " ha lasciato la chat.");
                     break;
                 }
-                // Attiva enigma
-                if (message.equalsIgnoreCase("enigma_on")) { // Quando l'utente scrive il comando enigma_on in chat
-                    System.out.println("ENIGMA encrypting ON");// Verrà stampato un messaggio di avviso
-                    enigmaOn = true;// E la variabile diventerà true, attivando l'encrypting a riga 60
-                    aesOn = false;
-                    continue;
-                }
-                // Attiva eas encrypting
-                if (message.equalsIgnoreCase("aes_on")) {
-                    System.out.println("AES encrypting ON");
-                    aesOn = true;
-                    enigmaOn = false;
-                    continue;
-                }
-                // disattiva enigma
-                if (message.equalsIgnoreCase("enigma_off")) {// Quando l'utente scrive il comando enigma_on in chat
-                    System.out.println("ENIGMA encrypting OFF");// Verrà stampato un messaggio di avviso
-                    enigmaOn = false;// E la variabile diventerà false, disattivando l'encrypting a riga 60
-                    continue;
-                }
-                // disattiva aes
-                if (message.equalsIgnoreCase("aes_off")) {// Quando l'utente scrive il comando enigma_on in chat
-                    System.out.println("AES encrypting OFF");// Verrà stampato un messaggio di avviso
-                    aesOn = false;// E la variabile diventerà false, disattivando l'encrypting a riga 60
-                    continue;
-                }
 
-                // Cripta il messaggio se l'utente ha scritto il comando enigma_on
-                if (enigmaOn == true) {
-                    try { // Prova a criptare il messaggio utilizzando ENIGMA
-                        message = enigmaSimulator.cifraDecifra(message, true); // Cripta il messaggio utilizzando ENIGMA
-                    } catch (Exception e) { // Gestisce eventuali eccezioni
-                        System.err.println("Errore nella crittografia del messaggio: " + e.getMessage()); // Stampa un
-                                                                                                          // messaggio
-                                                                                                          // di errore
-                        continue; // Salta all'iterazione successiva del loop
-                    }
+                // Cripta il messaggio se l'utente ha scelto di farlo.
+                if (scelta.equalsIgnoreCase("si")) {
+                    String messaggioCriptato = CifrarioDiCesare.cripta(message, sceltaShift);
+                    out.println(username + ": " + messaggioCriptato);
                 }
-                // Cripta se l'utente ha il comando eas_on
-                if (aesOn == true) { // Se è attivo AES
-                    try { // Prova a criptare il messaggio utilizzando AES
-                        message = CryptoUtils.encrypt(message, propsKey); // Cripta il messaggio utilizzando AES
-                    } catch (Exception e) { // Gestisce eventuali eccezioni
-                        System.err.println("Errore nella crittografia del messaggio: " +
-                                e.getMessage()); // Stampa un di errore
-                        continue; // Salta all'iterazione successiva del loop
-                    }
-                }
-                out.println(username + ": " + message);
             }
+
+            // Invia il messaggio al server.
+
         } catch (IOException e) {
             System.out.println("Si è verificato un errore di rete: " + e.getMessage());
-        }
-    }
-
-    private static String getPSK(String filename) { // Metodo privato per ottenere la chiave condivisa dal file di
-                                                    // configurazione
-        Properties prop = new Properties(); // Crea un nuovo oggetto Properties per gestire le proprietà
-        try (FileInputStream fis = new FileInputStream(filename)) { // Apre un file di input stream per leggere le
-                                                                    // proprietà
-            prop.load(fis); // Carica le proprietà dal file
-            return prop.getProperty("key"); // Restituisce il valore della chiave condivisa dal file di
-                                            // configurazione
-        } catch (IOException e) { // Gestisce eventuali eccezioni di IO
-            e.printStackTrace(); // Stampa lo stack trace dell'eccezione
-            return null; // Restituisce null in caso di errore
         }
     }
 }
