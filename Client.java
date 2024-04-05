@@ -45,20 +45,23 @@ public class Client {
                         // System.out.println(in.nextLine());
                         try { // Prova a decodificare il messaggio
                             if (aesOn == true) { // Se è attivo l'AES
-                                message = CryptoUtils.decrypt(message, propsKey); // Decifra il messaggio
-                                                                                  // utilizzando AES
+                                message = CryptoUtils.decrypt(message, propsKey);
+                                // Decifra il messaggio
+                                // utilizzando AES
                             }
                             if (enigmaOn == true) { // Altrimenti, se è attivo Enigma
                                 message = enigmaSimulator.cifraDecifra(message, false); // Decifra il messaggio
                                                                                         // utilizzando Enigma
                             }
-                            if (ceasarOn == true) { // Altrimenti, se è attivo Enigma
+                            if (ceasarOn == true) { // Altrimenti, se è attivo ceasar
                                 message = CifrarioDiCesare.trasforma(message, -shift); // Decifra il messaggio
-                                                                                       // utilizzando Enigma
+                                                                                       // utilizzando ceasar con dati
+                                                                                       // shift
                             }
                             System.out.println(message); // Stampa il messaggio decodificato
                         } catch (Exception e) { // Gestisce eventuali eccezioni
-                            System.out.println("Ricevuto messaggio non decriptabile"); // Stampa un messaggio di errore
+                            System.out.println("Ricevuto messaggio non decriptabile"); // Stampa un
+                                                                                       // messaggio di // errore
                         }
                     }
                 } catch (IOException e) {
@@ -124,10 +127,14 @@ public class Client {
                     continue;
                 }
 
+                String usernameMessage = username + ": " + message;
                 // Cripta il messaggio se l'utente ha scritto il comando enigma_on
                 if (enigmaOn == true) {
                     try { // Prova a criptare il messaggio utilizzando ENIGMA
-                        message = enigmaSimulator.cifraDecifra(message, true); // Cripta il messaggio utilizzando ENIGMA
+                        usernameMessage = enigmaSimulator.cifraDecifra(username, true) + ": "
+                                + enigmaSimulator.cifraDecifra(message, true);
+                        ; // Cripta il messaggio
+                          // utilizzando ENIGMA
                     } catch (Exception e) { // Gestisce eventuali eccezioni
                         System.err.println("Errore nella crittografia del messaggio: " + e.getMessage()); // Stampa un
                                                                                                           // messaggio
@@ -138,7 +145,9 @@ public class Client {
                 // Cripta se l'utente ha il comando eas_on
                 if (aesOn == true) { // Se è attivo AES
                     try { // Prova a criptare il messaggio utilizzando AES
-                        message = CryptoUtils.encrypt(message, propsKey); // Cripta il messaggio utilizzando AES
+                        usernameMessage = CryptoUtils.encrypt(username, propsKey) + ": "
+                                + CryptoUtils.encrypt(message, propsKey); // Cripta il messaggio
+                        // utilizzando AES
                     } catch (Exception e) { // Gestisce eventuali eccezioni
                         System.err.println("Errore nella crittografia del messaggio: " +
                                 e.getMessage()); // Stampa un di errore
@@ -149,14 +158,16 @@ public class Client {
                 if (ceasarOn == true) { // Se è attivo CAESAR
                     try { // Prova a criptare il messaggio utilizzando CAESAR
                           // CifrarioDiCesare cifrarioDiCesare = new CifrarioDiCesare();
-                        message = CifrarioDiCesare.trasforma(message, shift); // Cripta il messaggio utilizzando CAESAR
+                        usernameMessage = CifrarioDiCesare.trasforma(username, shift) + ": "
+                                + CifrarioDiCesare.trasforma(message, shift); // Cripta il messaggio utilizzando
+                        // CAESAR
                     } catch (Exception e) { // Gestisce eventuali eccezioni
                         System.err.println("Errore nella crittografia del messaggio: " +
                                 e.getMessage()); // Stampa un di errore
                         continue; // Salta all'iterazione successiva del loop
                     }
                 }
-                out.println(username + ": " + message);
+                out.println(usernameMessage);
             }
         } catch (IOException e) {
             System.out.println("Si è verificato un errore di rete: " + e.getMessage());
