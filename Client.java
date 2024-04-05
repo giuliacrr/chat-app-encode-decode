@@ -41,10 +41,9 @@ public class Client {
             Thread serverListener = new Thread(() -> {
                 try (Scanner in = new Scanner(socket.getInputStream())) {
                     while (in.hasNextLine()) {
-                        System.out.println(in.nextLine());
                         String message = (in.nextLine());
+                        // System.out.println(in.nextLine());
                         try { // Prova a decodificare il messaggio
-
                             if (aesOn == true) { // Se è attivo l'AES
                                 message = CryptoUtils.decrypt(message, propsKey); // Decifra il messaggio
                                                                                   // utilizzando AES
