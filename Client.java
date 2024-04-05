@@ -9,6 +9,10 @@ public class Client {
     static String propsKey = getPSK("enigma.properties");// Inseriamo qui il nome del file da cui leggere la prop "key"
                                                          // con il
     // metodo getPSK
+    private static boolean enigmaOn = false; // booleana enigmaOn, false indica non attivo.
+    private static boolean aesOn = false;
+    private static boolean ceasarOn = false;
+    private static int shift = 0;
 
     public static void main(String[] args) {
         if (args.length != 3) {
@@ -30,17 +34,33 @@ public class Client {
 
             // Istanza di EnigmaSimulator, se richiesto dall'utente.
             EnigmaSimulator enigmaSimulator = new EnigmaSimulator();
-            boolean enigmaOn = false; // booleana enigmaOn, false indica non attivo.
-            boolean aesOn = false;
-            boolean ceasarOn = false;
 
-            int shift=0;; //numeri di salti per ceasar
+            ; // numeri di salti per ceasar
 
             // Thread per ascoltare e stampare i messaggi in arrivo dal server.
             Thread serverListener = new Thread(() -> {
                 try (Scanner in = new Scanner(socket.getInputStream())) {
                     while (in.hasNextLine()) {
                         System.out.println(in.nextLine());
+                        String message = (in.nextLine());
+                        try { // Prova a decodificare il messaggio
+
+                            if (aesOn == true) { // Se è attivo l'AES
+                                message = CryptoUtils.decrypt(message, propsKey); // Decifra il messaggio
+                                                                                  // utilizzando AES
+                            }
+                            if (enigmaOn == true) { // Altrimenti, se è attivo Enigma
+                                message = enigmaSimulator.cifraDecifra(message, false); // Decifra il messaggio
+                                                                                        // utilizzando Enigma
+                            }
+                            if (ceasarOn == true) { // Altrimenti, se è attivo Enigma
+                                message = CifrarioDiCesare.trasforma(message, -shift); // Decifra il messaggio
+                                                                                       // utilizzando Enigma
+                            }
+                            System.out.println(message); // Stampa il messaggio decodificato
+                        } catch (Exception e) { // Gestisce eventuali eccezioni
+                            System.out.println("Ricevuto messaggio non decriptabile"); // Stampa un messaggio di errore
+                        }
                     }
                 } catch (IOException e) {
                     System.out.println("Errore durante la lettura dal server: " + e.getMessage());
@@ -73,7 +93,6 @@ public class Client {
                     continue;
                 }
 
-                
                 // Attiva caesar
                 if (message.equalsIgnoreCase("caesar_on")) { // Quando l'utente scrive il comando ceasar_on in chat
                     System.out.println("CAESAR encrypting ON");// Verrà stampato un messaggio di avviso
@@ -106,9 +125,6 @@ public class Client {
                     continue;
                 }
 
-                
-
-
                 // Cripta il messaggio se l'utente ha scritto il comando enigma_on
                 if (enigmaOn == true) {
                     try { // Prova a criptare il messaggio utilizzando ENIGMA
@@ -133,7 +149,7 @@ public class Client {
 
                 if (ceasarOn == true) { // Se è attivo CAESAR
                     try { // Prova a criptare il messaggio utilizzando CAESAR
-                        //CifrarioDiCesare cifrarioDiCesare = new CifrarioDiCesare();
+                          // CifrarioDiCesare cifrarioDiCesare = new CifrarioDiCesare();
                         message = CifrarioDiCesare.trasforma(message, shift); // Cripta il messaggio utilizzando CAESAR
                     } catch (Exception e) { // Gestisce eventuali eccezioni
                         System.err.println("Errore nella crittografia del messaggio: " +

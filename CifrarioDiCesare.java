@@ -11,9 +11,10 @@ public class CifrarioDiCesare {
         }
 
         // Estrae i parametri dalla riga di comando
-        String messaggio = args[0].toLowerCase(); // Converti tutti i caratteri del messaggio in minuscolo per semplicità
-        int shift = Integer.parseInt(args[1]);     // Numero di spostamenti per il cifrario
-        int modalità = Integer.parseInt(args[2]);  // Modalità 1 per crittografia, 0 per decrittografia
+        String messaggio = args[0].toLowerCase(); // Converti tutti i caratteri del messaggio in minuscolo per
+                                                  // semplicità
+        int shift = Integer.parseInt(args[1]); // Numero di spostamenti per il cifrario
+        int modalità = Integer.parseInt(args[2]); // Modalità 1 per crittografia, 0 per decrittografia
 
         // Stringa per contenere il risultato
         String risultato = "";
@@ -44,17 +45,26 @@ public class CifrarioDiCesare {
 
     // Metodo che effettua la trasformazione del testo in base al parametro di shift
     public static String trasforma(String testo, int shift) {
-        StringBuilder risultato = new StringBuilder(); // Creazione di un oggetto StringBuilder per costruire la stringa risultante
+        StringBuilder risultato = new StringBuilder(); // Creazione di un oggetto StringBuilder per costruire la stringa
+                                                       // risultante
 
         // Iterazione attraverso ogni carattere del testo
         for (char carattere : testo.toCharArray()) {
             // Verifica se il carattere è presente nel dizionario
             if (DIZIONARIO.indexOf(carattere) != -1) {
-                int posizioneOriginale = DIZIONARIO.indexOf(carattere); // Ottiene la posizione originale del carattere nel dizionario
-                int nuovaPosizione = (DIZIONARIO.length() + posizioneOriginale + shift) % DIZIONARIO.length(); // Calcola la nuova posizione applicando lo shift
+                int posizioneOriginale = DIZIONARIO.indexOf(carattere); // Ottiene la posizione originale del carattere
+                                                                        // nel dizionario
+                int nuovaPosizione = (DIZIONARIO.length() + posizioneOriginale + shift) % DIZIONARIO.length(); // Calcola
+                                                                                                               // la
+                                                                                                               // nuova
+                                                                                                               // posizione
+                                                                                                               // applicando
+                                                                                                               // lo
+                                                                                                               // shift
                 risultato.append(DIZIONARIO.charAt(nuovaPosizione)); // Aggiunge il carattere trasformato al risultato
             } else {
-                risultato.append(carattere); // Se il carattere non è presente nel dizionario, lo aggiunge al risultato senza modificarlo
+                risultato.append(carattere); // Se il carattere non è presente nel dizionario, lo aggiunge al risultato
+                                             // senza modificarlo
             }
         }
         return risultato.toString(); // Restituisce il risultato come stringa
