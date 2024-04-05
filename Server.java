@@ -50,7 +50,6 @@ public class Server {
                 Scanner in = new Scanner(clientSocket.getInputStream());
                 out = new PrintWriter(clientSocket.getOutputStream(), true);
                 // Attende la ricezione dell'username dal client come primo messaggio
-                CifrarioDiCesare.decripta(onlineUsers, PORT);
                 String messageLog = in.nextLine();
                 String welcomeMessage = "L'utente " + messageLog + " si è appena connesso dall'IP "
                         + clientSocket.getRemoteSocketAddress();
@@ -101,6 +100,8 @@ public class Server {
                 System.out.println("Tentativo di inviare un messaggio vuoto o null.");
             }
         }
+
+    
         
     }
 }
